@@ -1,19 +1,26 @@
 # MCP 데스크탑 자동화 프로젝트
 
-ChatGPT 및 기타 LLM이 데스크탑을 자동으로 제어할 수 있도록 하는 MCP (Model Context Protocol) 서버입니다.
+ChatGPT 및 기타 LLM이 데스크탑을 자동으로 제어할 수 있도록 하는 MCP (Model Context Protocol) 서버입니다. **고수준 통합 도구**를 제공하여 LLM이 복잡한 데스크탑 작업을 쉽고 효율적으로 수행할 수 있습니다.
 
-## 기능
+## 주요 특징
 
-### 기본 자동화 기능
+### 🎯 고수준 통합 도구
+- **`click_text`**: 화면에서 텍스트를 찾아 자동으로 클릭 (인덱싱 → 검색 → 클릭 자동화)
+- **`type_text`**: 입력 필드를 찾아 텍스트 입력
+- **`find_element`**: 화면에서 요소 찾기 (위치 정보 반환)
+- **`interact_window`**: 윈도우에서 일련의 작업 순차 수행
+
+### 🧠 스마트 인덱싱
+- **자동 인덱싱**: 필요시에만 화면 인덱싱 수행
+- **캐싱 최적화**: 동일 화면에서 반복 작업 시 재인덱싱 방지
+- **상태 추적**: 인덱싱 상태를 추적하여 효율적인 작업 수행
+
+### 🔧 기본 자동화 기능
 - **마우스 제어**: 클릭, 이동, 드래그, 스크롤
 - **키보드 제어**: 텍스트 입력, 단축키, 특수 키
-- **스크린샷**: 전체 화면 또는 영역 캡처
-- **화면 정보**: 해상도, 픽셀 색상 조회
-
-### 고급 자동화 기능
-- **윈도우 관리**: 윈도우 찾기, 활성화, 크기 조절
+- **윈도우 관리**: 윈도우 찾기, 활성화, 정보 조회
 - **파일 시스템**: 파일 읽기, 디렉토리 탐색
-- **OCR**: 이미지에서 텍스트 추출
+- **OCR**: 이미지에서 텍스트 추출 (Tesseract 기반)
 - **보안**: 권한 확인, 위험 작업 경고, 로깅
 
 ## 설치
@@ -123,62 +130,106 @@ python aidesktop.py
 ```
 .
 ├── docs/
-│   └── prd.md              # 제품 요구사항 문서
+│   ├── prd.md                      # 제품 요구사항 문서
+│   ├── test_scenario.md            # 기본 테스트 시나리오
+│   └── test_scenario_advanced.md   # 고급 테스트 시나리오
 ├── src/
 │   └── mcp_desktop/
 │       ├── __init__.py
-│       ├── server.py        # MCP 서버 메인
-│       ├── tools.py          # MCP Tools 정의
-│       ├── resources.py     # MCP Resources
-│       ├── mouse.py         # 마우스 제어
-│       ├── keyboard.py      # 키보드 제어
-│       ├── screenshot.py   # 스크린샷
-│       ├── window.py        # 윈도우 관리
-│       ├── filesystem.py   # 파일 시스템
-│       ├── ocr.py          # OCR 기능
-│       ├── security.py     # 보안 관리
-│       └── utils.py        # 유틸리티
-├── aidesktop.py            # 채팅 UI (내장형 서버)
-├── main.py                 # 웹 브라우저
-├── index.html              # 채팅 UI HTML
-└── pyproject.toml          # 프로젝트 설정
+│       ├── server.py               # MCP 서버 메인
+│       ├── tools.py                # MCP Tools 정의 (고수준 도구)
+│       ├── smart_indexer.py        # 스마트 인덱싱 관리자
+│       ├── screen_indexer.py       # 화면 인덱싱 (OCR 기반)
+│       ├── resources.py            # MCP Resources
+│       ├── mouse.py                # 마우스 제어
+│       ├── keyboard.py             # 키보드 제어
+│       ├── screenshot.py           # 스크린샷
+│       ├── window.py               # 윈도우 관리
+│       ├── filesystem.py           # 파일 시스템
+│       ├── ocr.py                  # OCR 기능
+│       ├── security.py             # 보안 관리
+│       └── utils.py                # 유틸리티
+├── aidesktop.py                    # 채팅 UI (내장형 서버)
+├── main.py                         # 웹 브라우저
+├── index.html                      # 채팅 UI HTML
+└── pyproject.toml                  # 프로젝트 설정
 ```
 
 ## MCP Tools
 
-다음 MCP Tools를 사용할 수 있습니다:
+### 고수준 통합 도구 (권장)
 
-### 마우스 제어
-- `mouse_click`: 마우스 클릭
-- `mouse_move`: 마우스 이동
-- `mouse_drag`: 마우스 드래그
-- `mouse_scroll`: 마우스 스크롤
-- `mouse_get_position`: 마우스 위치 조회
+LLM이 사용하기 쉬운 고수준 도구들입니다. 내부적으로 인덱싱, 검색, 클릭 등을 자동으로 처리합니다.
 
-### 키보드 제어
-- `keyboard_type`: 텍스트 입력
-- `keyboard_press`: 키 누르기
-- `keyboard_hotkey`: 단축키 조합
+#### `click_text` - 텍스트 찾아 클릭
+화면에서 텍스트를 찾아 자동으로 클릭합니다. 인덱싱이 필요하면 자동으로 수행합니다.
 
-### 스크린샷
-- `screenshot_full`: 전체 화면 캡처
-- `screenshot_region`: 영역 캡처
-- `screenshot_get_size`: 화면 크기 조회
-- `screenshot_get_pixel_color`: 픽셀 색상 조회
+```json
+{
+  "name": "click_text",
+  "arguments": {
+    "search_text": "저장",
+    "window_id": null,  // 선택적
+    "exact_match": false,
+    "button": "left"
+  }
+}
+```
 
-### 윈도우 관리
-- `window_find`: 윈도우 찾기
-- `window_activate`: 윈도우 활성화
-- `window_get_info`: 윈도우 정보 조회
+#### `type_text` - 입력 필드에 텍스트 입력
+입력 필드를 찾아 클릭한 후 텍스트를 입력합니다.
 
-### 파일 시스템
-- `filesystem_read_file`: 파일 읽기
-- `filesystem_list_directory`: 디렉토리 목록 조회
-- `filesystem_get_file_info`: 파일 정보 조회
+```json
+{
+  "name": "type_text",
+  "arguments": {
+    "search_text": "이름",
+    "text": "홍길동",
+    "window_id": null  // 선택적
+  }
+}
+```
 
-### OCR
-- `ocr_extract_from_image`: 이미지에서 텍스트 추출
-- `ocr_extract_from_screenshot`: 스크린샷에서 텍스트 추출
+#### `find_element` - 화면 요소 찾기
+화면에서 텍스트나 요소를 찾아 위치 정보를 반환합니다.
+
+```json
+{
+  "name": "find_element",
+  "arguments": {
+    "search_text": "로그인",
+    "window_id": null,  // 선택적
+    "exact_match": false
+  }
+}
+```
+
+#### `interact_window` - 윈도우에서 여러 작업 수행
+특정 윈도우를 찾아 활성화한 후 여러 작업을 순차적으로 실행합니다.
+
+```json
+{
+  "name": "interact_window",
+  "arguments": {
+    "window_title": "메모장",
+    "actions": [
+      {"type": "click_text", "search_text": "파일"},
+      {"type": "type", "text": "안녕하세요"},
+      {"type": "hotkey", "keys": ["ctrl", "s"]}
+    ]
+  }
+}
+```
+
+### 유틸리티 도구
+
+필요한 경우에만 사용하는 보조 도구들입니다.
+
+- **`window_find`**: 윈도우 찾기
+- **`filesystem_read_file`**: 파일 읽기
+- **`filesystem_list_directory`**: 디렉토리 목록 조회
+
+> **참고**: 저수준 도구들(`mouse_click`, `keyboard_type` 등)은 내부적으로만 사용되며, 고수준 도구에서 자동으로 호출됩니다.
 
 ## 보안
 
@@ -190,24 +241,91 @@ python aidesktop.py
 
 이 프로젝트는 MIT 라이선스를 따릅니다.
 
-## Cursor에서 사용 예시
+## 사용 예시
 
-MCP 서버가 등록되면 Cursor의 AI 채팅에서 다음과 같이 사용할 수 있습니다:
+### Cursor에서 자연어 명령 사용
 
+MCP 서버가 등록되면 Cursor의 AI 채팅에서 자연어로 명령할 수 있습니다:
+
+#### 예시 1: 간단한 클릭 작업
 ```
-사용자: "화면을 캡처해서 보여줘"
-AI: [screenshot_full 도구 호출] → 화면 캡처 결과 표시
+사용자: "저장 버튼을 클릭해줘"
+AI: [click_text("저장") 호출] → 자동으로 인덱싱 → 텍스트 검색 → 클릭
+```
 
+#### 예시 2: 텍스트 입력
+```
+사용자: "이름 필드에 '홍길동'을 입력해줘"
+AI: [type_text("이름", "홍길동") 호출] → 입력 필드 찾기 → 클릭 → 텍스트 입력
+```
+
+#### 예시 3: 복합 작업
+```
+사용자: "Excel을 열고 A1에 '이름', B1에 '나이'를 입력하고 저장해줘"
+AI: [interact_window 호출]
+    → Excel 찾기 및 활성화
+    → A1 클릭 → "이름" 입력
+    → B1 클릭 → "나이" 입력
+    → Ctrl+S로 저장
+```
+
+#### 예시 4: 윈도우 작업
+```
 사용자: "메모장을 열고 '안녕하세요'를 입력해줘"
-AI: [window_find로 메모장 찾기] → [window_activate로 활성화] → [keyboard_type으로 텍스트 입력]
-
-사용자: "다운로드 폴더의 파일 목록을 보여줘"
-AI: [filesystem_list_directory로 목록 조회] → 결과 표시
+AI: [interact_window("메모장", [{"type": "type", "text": "안녕하세요"}])]
 ```
+
+#### 예시 5: 파일 시스템 작업
+```
+사용자: "다운로드 폴더의 파일 목록을 보여줘"
+AI: [filesystem_list_directory("C:/Users/.../Downloads")] → 결과 표시
+```
+
+### 실제 사용 사례
+
+더 많은 실제 사용 사례는 [고급 테스트 시나리오 문서](docs/test_scenario_advanced.md)를 참고하세요:
+- Excel에서 데이터 입력 및 분석
+- Word 문서 작성 및 서식 적용
+- 웹 브라우저에서 검색 및 로그인
+- 파일 탐색기에서 파일 정리
+- Outlook에서 이메일 작성 및 전송
+
+## 작동 원리
+
+### 스마트 인덱싱 워크플로우
+
+1. **요청 수신**: LLM이 `click_text("저장")` 같은 고수준 도구 호출
+2. **인덱싱 상태 확인**: 마지막 인덱싱 시간과 화면 크기 확인
+3. **자동 인덱싱** (필요시): 화면을 그리드로 분할하고 OCR 수행
+4. **텍스트 검색**: 인덱싱된 데이터에서 텍스트 검색
+5. **작업 수행**: 찾은 위치를 클릭하거나 텍스트 입력
+
+### Before vs After
+
+**Before (저수준 도구 사용)**:
+```
+screen_index() → screen_find_text("저장") → mouse_click(x, y)
+```
+- 3번의 도구 호출 필요
+- LLM이 각 단계를 계획해야 함
+- 인덱싱 상태를 확인할 방법 없음
+
+**After (고수준 도구 사용)**:
+```
+click_text("저장")
+```
+- 1번의 도구 호출로 완료
+- 내부적으로 모든 단계 자동 처리
+- 인덱싱 상태 자동 관리
+
+## 문서
+
+- [제품 요구사항 문서 (PRD)](docs/prd.md) - 프로젝트 전체 요구사항
+- [기본 테스트 시나리오](docs/test_scenario.md) - 도구별 기본 테스트
+- [고급 테스트 시나리오](docs/test_scenario_advanced.md) - 실제 사용 사례 기반 테스트
 
 ## 참고 자료
 
 - [MCP 공식 문서](https://modelcontextprotocol.io/)
 - [Cursor MCP 문서](https://docs.cursor.com/ko/context/mcp)
-- [PRD 문서](docs/prd.md)
 
