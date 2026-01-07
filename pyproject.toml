@@ -1,0 +1,34 @@
+[build-system]
+requires = [ "hatchling",]
+build-backend = "hatchling.build"
+
+[project]
+name = "pywebengine"
+version = "0.1.0+4"
+description = "MCP 데스크탑 자동화 서버 - ChatGPT를 이용한 데스크탑 제어"
+readme = "README.md"
+requires-python = ">=3.12.12"
+keywords = [ "mcp", "desktop-automation", "pyautogui", "chatgpt",]
+classifiers = [ "Development Status :: 3 - Alpha", "Intended Audience :: Developers", "License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3.12", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: System :: Systems Administration",]
+dependencies = [ "pyside6>=6.10.1", "pyside6-addons>=6.10.1", "pyautogui>=0.9.54", "mcp>=0.9.0", "Pillow>=10.0.0", "pytesseract>=0.3.10", "pywin32>=306; sys_platform == 'win32'", "keyboard>=0.13.5", "uv-easy>=0.2.53",]
+[[project.authors]]
+name = "David Cho"
+email = "csi00700@gmail.com"
+
+[project.license]
+text = "MIT"
+
+[project.optional-dependencies]
+dev = [ "pytest>=7.0.0", "black>=23.0.0", "isort>=5.12.0", "mypy>=1.0.0",]
+
+[project.scripts]
+mcp-desktop = "mcp_desktop.server:main_sync"
+
+[tool.uv_easy]
+build_number = 4
+
+[tool.hatch.build]
+include = [ "src/mcp_desktop",]
+
+[tool.hatch.build.targets.wheel]
+packages = [ "src/mcp_desktop",]

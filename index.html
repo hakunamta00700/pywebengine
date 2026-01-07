@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Desktop - 채팅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #FFFFFF;
+            overflow: hidden;
+        }
+
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* 스크롤바 스타일 */
+        #chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-container::-webkit-scrollbar-track {
+            background: #F0F0F0;
+            border-radius: 4px;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb {
+            background: #C0C0C0;
+            border-radius: 4px;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb:hover {
+            background: #A0A0A0;
+        }
+
+        .message-container {
+            display: flex;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .message-container.user {
+            justify-content: flex-end;
+        }
+
+        .message-container.ai {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 15px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-bubble.user {
+            background-color: #007AFF;
+            color: white;
+            margin-left: auto;
+        }
+
+        .message-bubble.ai {
+            background-color: #E5E5EA;
+            color: black;
+            margin-right: auto;
+        }
+
+        #input-area {
+            background-color: #F8F8F8;
+            border-top: 1px solid #E0E0E0;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        #input-field {
+            flex: 1;
+            min-height: 40px;
+            max-height: 100px;
+            padding: 10px;
+            border: 1px solid #D0D0D0;
+            border-radius: 20px;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            overflow-y: auto;
+        }
+
+        #input-field:focus {
+            border: 1px solid #007AFF;
+        }
+
+        #input-field::placeholder {
+            color: #999;
+        }
+
+        #send-button {
+            width: 60px;
+            height: 40px;
+            background-color: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+        }
+
+        #send-button:hover {
+            background-color: #0051D5;
+        }
+
+        #send-button:active {
+            background-color: #003D9E;
+        }
+
+        #send-button:disabled {
+            background-color: #C0C0C0;
+            cursor: not-allowed;
+        }
+
+        #capture-button {
+            width: 60px;
+            height: 40px;
+            background-color: #34C759;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+        }
+
+        #capture-button:hover {
+            background-color: #28A745;
+        }
+
+        #capture-button:active {
+            background-color: #1E7E34;
+        }
+
+        #capture-button:disabled {
+            background-color: #C0C0C0;
+            cursor: not-allowed;
+        }
+
+        .message-bubble img {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .message-bubble img:hover {
+            opacity: 0.8;
+        }
+
+        /* 팝업 다이얼로그 스타일 */
+        #image-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #image-popup.active {
+            display: flex;
+        }
+
+        #image-popup-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        #image-popup-content img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #image-popup-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+        }
+
+        #image-popup-close:hover {
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container"></div>
+    <div id="input-area">
+        <textarea 
+            id="input-field" 
+            placeholder="메시지를 입력하세요... (Enter: 전송, Shift+Enter: 줄바꿈)"
+            rows="1"
+        ></textarea>
+        <button id="capture-button">캡쳐</button>
+        <button id="send-button">전송</button>
+    </div>
+
+    <!-- 이미지 팝업 다이얼로그 -->
+    <div id="image-popup">
+        <div id="image-popup-content">
+            <button id="image-popup-close">×</button>
+            <img id="image-popup-img" src="" alt="캡쳐된 화면">
+        </div>
+    </div>
+
+    <!-- QWebChannel for Python-JavaScript communication -->
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script>
+        let pyBridge = null;
+
+        // QWebChannel 초기화
+        if (typeof QWebChannel !== 'undefined') {
+            new QWebChannel(qt.webChannelTransport, function(channel) {
+                pyBridge = channel.objects.pyBridge;
+                console.log('WebChannel 연결 완료');
+            });
+        }
+
+        const chatContainer = document.getElementById('chat-container');
+        const inputField = document.getElementById('input-field');
+        const sendButton = document.getElementById('send-button');
+        const captureButton = document.getElementById('capture-button');
+        const imagePopup = document.getElementById('image-popup');
+        const imagePopupImg = document.getElementById('image-popup-img');
+        const imagePopupClose = document.getElementById('image-popup-close');
+
+        // 초기 환영 메시지
+        addMessage('안녕하세요! 무엇을 도와드릴까요?', false);
+
+        // 입력창 높이 자동 조정
+        inputField.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Enter 키 처리
+        inputField.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 전송 버튼 클릭
+        sendButton.addEventListener('click', sendMessage);
+
+        // 화면 캡쳐 버튼 클릭
+        captureButton.addEventListener('click', captureScreen);
+
+        // 화면 캡쳐 함수
+        function captureScreen() {
+            console.log('화면 캡쳐 버튼 클릭');
+            if (!pyBridge) {
+                console.error('pyBridge가 없습니다.');
+                return;
+            }
+            if (!pyBridge.captureScreen) {
+                console.error('captureScreen 메서드가 없습니다.');
+                return;
+            }
+
+            console.log('Python captureScreen 호출');
+            // 버튼 비활성화
+            captureButton.disabled = true;
+            captureButton.textContent = '캡쳐 중...';
+
+            // Python에서 화면 캡쳐 요청 (비동기)
+            try {
+                pyBridge.captureScreen();
+            } catch (error) {
+                console.error('captureScreen 호출 오류:', error);
+                captureButton.disabled = false;
+                captureButton.textContent = '캡쳐';
+            }
+        }
+
+        // 화면 캡쳐 완료 콜백 함수 (Python에서 호출)
+        window.onScreenCaptureComplete = function(base64Data) {
+            console.log('onScreenCaptureComplete 호출됨, 데이터 길이:', base64Data ? base64Data.length : 0);
+            try {
+                if (base64Data && base64Data.length > 0) {
+                    console.log('이미지 데이터 처리 중...');
+                    // base64 데이터를 이미지로 변환하여 메시지에 추가
+                    const imageDataUrl = 'data:image/png;base64,' + base64Data;
+                    addImageMessage(imageDataUrl, true);
+                    console.log('이미지 메시지 추가 완료');
+                } else {
+                    console.error('화면 캡쳐에 실패했습니다. (데이터가 비어있음)');
+                    addMessage('화면 캡쳐에 실패했습니다.', false);
+                }
+            } catch (error) {
+                console.error('화면 캡쳐 처리 오류:', error);
+                addMessage('화면 캡쳐 처리 중 오류가 발생했습니다.', false);
+            } finally {
+                // 버튼 다시 활성화
+                captureButton.disabled = false;
+                captureButton.textContent = '캡쳐';
+            }
+        };
+
+        // 메시지 전송 함수
+        function sendMessage() {
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            // 사용자 메시지 추가
+            addMessage(message, true);
+
+            // 입력창 초기화
+            inputField.value = '';
+            inputField.style.height = 'auto';
+
+            // Python으로 메시지 전달
+            if (pyBridge && pyBridge.onMessageSent) {
+                pyBridge.onMessageSent(message);
+            } else {
+                // 테스트용: 간단한 에코 응답 (WebChannel이 연결되지 않은 경우)
+                setTimeout(() => {
+                    addMessage(`받은 메시지: ${message}`, false);
+                }, 100);
+            }
+        }
+
+        // 메시지 추가 함수
+        function addMessage(message, isUser) {
+            const messageContainer = document.createElement('div');
+            messageContainer.className = `message-container ${isUser ? 'user' : 'ai'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${isUser ? 'user' : 'ai'}`;
+            bubble.textContent = message;
+
+            messageContainer.appendChild(bubble);
+            chatContainer.appendChild(messageContainer);
+
+            // 스크롤을 맨 아래로
+            scrollToBottom();
+        }
+
+        // 이미지 메시지 추가 함수
+        function addImageMessage(imageDataUrl, isUser) {
+            const messageContainer = document.createElement('div');
+            messageContainer.className = `message-container ${isUser ? 'user' : 'ai'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${isUser ? 'user' : 'ai'}`;
+
+            const img = document.createElement('img');
+            img.src = imageDataUrl;
+            img.alt = '캡쳐된 화면';
+            img.onclick = function() {
+                showImagePopup(imageDataUrl);
+            };
+
+            bubble.appendChild(img);
+            messageContainer.appendChild(bubble);
+            chatContainer.appendChild(messageContainer);
+
+            // 스크롤을 맨 아래로
+            scrollToBottom();
+        }
+
+        // 이미지 팝업 표시
+        function showImagePopup(imageDataUrl) {
+            imagePopupImg.src = imageDataUrl;
+            imagePopup.classList.add('active');
+        }
+
+        // 이미지 팝업 닫기
+        function closeImagePopup() {
+            imagePopup.classList.remove('active');
+        }
+
+        // 팝업 닫기 이벤트
+        imagePopupClose.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeImagePopup();
+        });
+
+        imagePopup.addEventListener('click', function(e) {
+            if (e.target === imagePopup) {
+                closeImagePopup();
+            }
+        });
+
+        // ESC 키로 팝업 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && imagePopup.classList.contains('active')) {
+                closeImagePopup();
+            }
+        });
+
+        // 스크롤을 맨 아래로 이동
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Python에서 메시지를 받는 함수 (외부에서 호출 가능)
+        window.addAIMessage = function(message) {
+            addMessage(message, false);
+        };
+
+        // Python에서 초기화 완료 시 호출
+        if (window.pyBridge && window.pyBridge.onReady) {
+            window.pyBridge.onReady();
+        }
+    </script>
+</body>
+</html>
+

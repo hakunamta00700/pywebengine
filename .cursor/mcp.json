@@ -1,0 +1,12 @@
+{
+    "mcpServers": {
+        "desktop-automation": {
+            "command": "uv",
+            "args": [
+                "run",
+                "mcp-desktop"
+            ],
+            "cwd": "${workspaceFolder}"
+        }
+    }
+}
